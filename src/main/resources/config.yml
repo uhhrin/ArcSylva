@@ -1,0 +1,31 @@
+require-axe: true
+sneak-to-disable: true
+confirm-modified-trees: true
+confirmations:
+  timeout: 8
+limits:
+  max-blocks-per-tree: 64
+  blocks-per-tick: 12
+  scan-timeout-ms: 100
+detection:
+  min-vertical-logs: 2
+  leaf-search-radius: 4
+  min-natural-leaves: 1
+  allowed-log-types:
+    - OAK_LOG
+    - BIRCH_LOG
+    - SPRUCE_LOG
+    - JUNGLE_LOG
+    - ACACIA_LOG
+    - DARK_OAK_LOG
+    - MANGROVE_LOG
+    - CHERRY_LOG
+    - CRIMSON_STEM
+    - WARPED_STEM
+features:
+  replant-sapling: true
+  drop-saplings: true
+  apply-fortune: true
+  apply-durability: true
+  durability-multiplier: 1.0
+enabled-worlds: []

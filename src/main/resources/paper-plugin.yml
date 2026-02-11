@@ -1,0 +1,4 @@
+name: ArcSylva
+version: '1.0-SNAPSHOT'
+main: org.thatnubarin.arcSylva.ArcSylva
+api-version: '1.21'
