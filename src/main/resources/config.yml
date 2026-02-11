@@ -22,6 +22,16 @@ detection:
     - CHERRY_LOG
     - CRIMSON_STEM
     - WARPED_STEM
+    - STRIPPED_OAK_LOG
+    - STRIPPED_BIRCH_LOG
+    - STRIPPED_SPRUCE_LOG
+    - STRIPPED_JUNGLE_LOG
+    - STRIPPED_ACACIA_LOG
+    - STRIPPED_DARK_OAK_LOG
+    - STRIPPED_MANGROVE_LOG
+    - STRIPPED_CHERRY_LOG
+    - STRIPPED_CRIMSON_STEM
+    - STRIPPED_WARPED_STEM
 features:
   replant-sapling: true
   drop-saplings: true

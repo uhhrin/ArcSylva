@@ -26,19 +26,21 @@ class NaturalTreeDetector(
             return Optional.empty()
         }
 
-        val verticalCount = countVerticalLogs(block)
+        val base = findBaseLog(block)
+        val verticalCount = countVerticalFromBase(base)
         if (verticalCount < settings.minVerticalLogs) return Optional.empty()
 
-        val treeLogs = scanner.scanConnectedLogs(block, allowedLogs, settings.maxBlocks)
+        val scanTimeoutNanos = settings.scanTimeoutMs.toLong() * 1_000_000
+        val treeLogs = scanner.scanConnectedLogs(base, allowedLogs, settings.maxBlocks, scanTimeoutNanos)
         if (treeLogs.isEmpty()) return Optional.empty()
 
-        val hasPlayerPlaced = treeLogs.any { repository.isPlayerPlaced(it) }
-        val requiresConfirmation = hasPlayerPlaced && settings.confirmModified && !player.hasPermission(PermissionNode.FORCE.node)
-        if (hasPlayerPlaced && !settings.confirmModified && !player.hasPermission(PermissionNode.FORCE.node)) {
+        val hasPlayerPlaced = repository.isPlayerPlaced(base) || treeLogs.any { repository.isPlayerPlaced(it) }
+        val requiresConfirmation = hasPlayerPlaced && settings.confirmModified
+        if (hasPlayerPlaced && !settings.confirmModified) {
             return Optional.empty()
         }
 
-        val leaves = findLeavesAround(treeLogs, settings.minNaturalLeaves)
+        val leaves = findLeavesAround(treeLogs, settings.minNaturalLeaves, scanTimeoutNanos)
         if (leaves.size < settings.minNaturalLeaves) return Optional.empty()
 
         val allBlocks = treeLogs + leaves
@@ -46,21 +48,24 @@ class NaturalTreeDetector(
             return Optional.empty()
         }
 
-        return Optional.of(TreeData(block, treeLogs, leaves, hasPlayerPlaced, requiresConfirmation))
+        return Optional.of(TreeData(base, treeLogs, leaves, hasPlayerPlaced, requiresConfirmation))
     }
 
-    private fun findLeavesAround(logs: List<Block>, needed: Int): List<Block> {
+    private fun findLeavesAround(logs: List<Block>, needed: Int, timeoutNanos: Long): List<Block> {
         val radius = settings.leafRadius
         if (radius <= 0) return emptyList()
 
         val world = logs.firstOrNull()?.world ?: return emptyList()
         val leaves = mutableListOf<Block>()
         val seen = HashSet<Block>()
+        val deadline = System.nanoTime() + timeoutNanos
 
         for (log in logs) {
+            if (System.nanoTime() > deadline) break
             for (dx in -radius..radius) {
                 for (dy in -radius..radius) {
                     for (dz in -radius..radius) {
+                        if (System.nanoTime() > deadline) break
                         val bx = log.x + dx
                         val by = log.y + dy
                         val bz = log.z + dz
@@ -77,13 +82,25 @@ class NaturalTreeDetector(
         return leaves
     }
 
-    private fun countVerticalLogs(block: Block): Int {
+    private fun countVerticalFromBase(base: Block): Int {
         var count = 0
-        var current: Block? = block
+        var current: Block? = base
         while (current != null && count < settings.maxBlocks && allowedLogs.contains(current.type)) {
             count++
             current = current.getRelative(0, 1, 0)
         }
         return count
+    }
+
+    private fun findBaseLog(start: Block): Block {
+        var current = start
+        var steps = 0
+        while (steps < settings.maxBlocks) {
+            val below = current.getRelative(0, -1, 0)
+            if (!allowedLogs.contains(below.type)) break
+            current = below
+            steps++
+        }
+        return current
     }
 }

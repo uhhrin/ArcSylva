@@ -13,7 +13,8 @@ import java.util.concurrent.CompletableFuture
 
 class BatchTreeBreaker(
     private val plugin: JavaPlugin,
-    private val settings: Settings
+    private val settings: Settings,
+    private val blockRepository: org.thatnubarin.arcSylva.data.repository.BlockDataRepository
 ) : TreeBreaker {
     override fun breakTree(tree: TreeData, player: Player, tool: ItemStack): CompletableFuture<BreakResult> {
         val future = CompletableFuture<BreakResult>()
@@ -32,17 +33,21 @@ class BatchTreeBreaker(
                     if (block.type.isAir) {
                         index++; processed++; continue
                     }
+                    block.setMetadata("arcsylva_breaking", org.bukkit.metadata.FixedMetadataValue(plugin, true))
                     val breakEvent = org.bukkit.event.block.BlockBreakEvent(block, player)
                     Bukkit.getPluginManager().callEvent(breakEvent)
                     if (!breakEvent.isCancelled) {
                         block.breakNaturally(tool, true)
                     }
+                    block.removeMetadata("arcsylva_breaking", plugin)
                     index++; processed++
                 }
                 if (index >= blocks.size) {
                     if (settings.playSound) {
                         player.world.playSound(tree.root.location, Sound.BLOCK_WOOD_BREAK, 0.8f, 1.0f)
                     }
+                    // Clean up tracking for felled logs so placed-state shrinks over time.
+                    blocks.forEach { felled -> blockRepository.removeTracking(felled) }
                     cancel(); future.complete(BreakResult(blocks.size))
                 }
             }

@@ -4,11 +4,12 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
-import org.thatnubarin.arcSylva.confirmation.ConfirmationManager
 import org.thatnubarin.arcSylva.config.Settings
 import org.thatnubarin.arcSylva.core.breaking.TreeBreaker
 import org.thatnubarin.arcSylva.core.tree.TreeDetector
 import org.thatnubarin.arcSylva.core.validation.ValidationChain
+import net.kyori.adventure.text.Component
+import org.thatnubarin.arcSylva.confirmation.ConfirmationManager
 
 class TreeBreakListener(
     private val detector: TreeDetector,
@@ -23,21 +24,25 @@ class TreeBreakListener(
         val block = event.block
         val player = event.player
 
+        if (block.hasMetadata("arcsylva_breaking")) {
+            return
+        }
+
         val detection = detector.detectTree(block, player)
         if (detection.isEmpty) return
         val tree = detection.get()
 
         val validation = validationChain.validate(player, block, tree)
         if (!validation.valid) {
-            validation.message?.let { player.sendMessage(it) }
+            validation.message?.let { player.sendActionBar(Component.text(it)) }
             return
         }
 
         if (tree.requiresConfirmation) {
-            val confirmed = confirmationManager.requestOrConfirm(player, tree)
+            val confirmed = confirmationManager.checkOrPrompt(player, tree)
             if (!confirmed) {
                 event.isCancelled = true
-                player.sendMessage("This looks player-placed. Break again within ${settings.confirmTimeoutSeconds}s to confirm felling it.")
+                player.sendActionBar(Component.text("Looks like you have placed this, Sure you wanna do this? Break again within ${settings.confirmTimeoutSeconds}s to confirm."))
                 return
             }
         }

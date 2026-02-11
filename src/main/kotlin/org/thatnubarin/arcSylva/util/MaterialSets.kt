@@ -16,7 +16,17 @@ object MaterialSets {
         Material.MANGROVE_LOG,
         Material.CHERRY_LOG,
         Material.CRIMSON_STEM,
-        Material.WARPED_STEM
+        Material.WARPED_STEM,
+        Material.STRIPPED_OAK_LOG,
+        Material.STRIPPED_BIRCH_LOG,
+        Material.STRIPPED_SPRUCE_LOG,
+        Material.STRIPPED_JUNGLE_LOG,
+        Material.STRIPPED_ACACIA_LOG,
+        Material.STRIPPED_DARK_OAK_LOG,
+        Material.STRIPPED_MANGROVE_LOG,
+        Material.STRIPPED_CHERRY_LOG,
+        Material.STRIPPED_CRIMSON_STEM,
+        Material.STRIPPED_WARPED_STEM
     )
 
     val LEAVES: Set<Material> = setOf(
@@ -35,6 +45,7 @@ object MaterialSets {
     val AXES: Set<Material> = setOf(
         Material.WOODEN_AXE,
         Material.STONE_AXE,
+        Material.COPPER_AXE,
         Material.IRON_AXE,
         Material.GOLDEN_AXE,
         Material.DIAMOND_AXE,

@@ -25,7 +25,7 @@ class ArcSylva : JavaPlugin() {
         val repository = PDCBlockRepository(this)
         val confirmationManager = ConfirmationManager(settings.confirmTimeoutSeconds)
         val detector = NaturalTreeDetector(settings, repository, FloodTreeScanner())
-        val breaker = BatchTreeBreaker(this, settings)
+        val breaker = BatchTreeBreaker(this, settings, repository)
         val validators = listOf(
             PermissionValidator(settings),
             ToolValidator(settings),
